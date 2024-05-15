@@ -1,3 +1,4 @@
+import System.Win32.Automation (xBUTTON1)
 siguiente :: Integer -> Integer
 siguiente nro = nro + 1
 
@@ -55,4 +56,14 @@ cuadruple nro = doble (doble nro)
 esMayorA :: Integer -> Bool
 esMayorA nro =  doble (siguiente (nro+2) ) > 10
 
+maximoSe :: Ord a => (t -> a) -> [t] -> t
+maximoSe _ [x] = x
+maximoSe f (x:xs) | f x > f (maximoSe f xs) = x
+                  | otherwise = maximoSe f xs
 
+
+algo lista = map (promedio. filter (>=6)) lista
+
+promedio notas = (sum notas) `div` (length notas) 
+
+sinApla listaAlumnos = map (promedio . filter (>= 6)) listaAlumnos
