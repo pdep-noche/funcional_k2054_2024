@@ -1,3 +1,5 @@
+import Data.Array (listArray)
+import Language.Haskell.TH (AnnLookup)
 
 data Animal= Raton {nombre :: String, edad :: Double, peso :: Double, enfermedades :: [String]} deriving Show
 -- Ejemplo de raton
@@ -58,3 +60,45 @@ pierdePeso peso | peso > 2 = peso * 0.9
 hierbaMagica :: Animal -> Animal
 hierbaMagica unAnimal = (modificarEdad (*0). modificarEnfermedad (const [])) unAnimal
 
+
+medicamento :: [(Animal -> Animal)] -> Animal -> Animal
+medicamento lista animal = foldl  (\unAni unaHierba -> unaHierba unAni)  animal  lista
+
+medicamento' lista animal = foldl (flip ($)) animal lista
+{-
+    ghci> medicamento [hierbaVerde "tuberculosis", alcachofa, hierbaMagica] cerebro
+-}
+
+antiAge :: Animal -> Animal
+antiAge  = medicamento(replicate 3 hierbaBuena ++ [alcachofa]) 
+
+
+reduceFatFast :: Int -> Animal -> Animal
+reduceFatFast unaPotencia unAnimal = medicamento ([hierbaVerde "obesidad"] ++ replicate unaPotencia alcachofa) unAnimal
+
+
+{- ghci> reduceFatFast 3 cerebro 
+Raton {nombre = "Cerebro", edad = 9.0, peso = 0.171475, enfermedades = ["brucelosis","sarampi\243n","tuberculosis"]}
+-}
+{-
+ghci> antiAge cerebro
+Raton {nombre = "Cerebro", edad = 1.3160740129524924, peso = 0.19, enfermedades = ["brucelosis","sarampi\243n","tuberculosis"]}
+-}
+
+hierbaMilagrosa :: Animal -> Animal
+hierbaMilagrosa unAnimal = medicamento (map hierbaVerde enfermedadesInfecciosas) unAnimal
+
+
+cantidadIdeal :: ( Int -> Bool)  -> Int
+cantidadIdeal condicion = (head. filter condicion) [1..]
+
+
+estanMejoresQueNunca :: [Animal]  -> (Animal -> Animal) -> Bool
+estanMejoresQueNunca ratones medicamento = all ((<1).peso.medicamento) ratones
+
+{-ghci> estanMejoresQueNunca [cerebro] antiAge 
+True-}
+
+
+experimento :: [Animal] -> Int
+experimento animales = cantidadIdeal(estanMejoresQueNunca animales.reduceFatFast)
